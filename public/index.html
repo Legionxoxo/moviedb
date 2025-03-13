@@ -22,7 +22,7 @@
       .then(data => {
         const folderContentsDiv = document.getElementById('folder-contents');
 
-        console.log(data)
+        console.log(data);
         
         data.forEach(movie => {
           const div = document.createElement('div');
@@ -34,31 +34,38 @@
             div.classList.add('error');
           } else {
             // Movie image
-            if (movie.image) {
+            if (movie.Poster) {
               const img = document.createElement('img');
-              img.src = movie.image;
+              img.src = movie.Poster;
               div.appendChild(img);
             }
 
+           
+
             // Movie details
-            console.log
             const details = `
-              <strong>Title:</strong> ${movie.title} <br>
-              <strong>Year:</strong> ${movie.year} <br>
-              <strong>Rated:</strong> ${movie.rated || 'N/A'} <br>
-              <strong>Released:</strong> ${movie.released || 'N/A'} <br>
-              <strong>Runtime:</strong> ${movie.runtime} <br>
-              <strong>Genres:</strong> ${movie.genres.join(', ')} <br>
-              <strong>Directors:</strong> ${movie.directors.join(', ')} <br>
-              <strong>Writers:</strong> ${movie.writers ? movie.writers.join(', ') : 'N/A'} <br>
-              <strong>Actors:</strong> ${movie.actors || 'N/A'} <br>
-              <strong>Plot:</strong> ${movie.overview} <br>
-              <strong>Language:</strong> ${movie.originalLanguage} <br>
-              <strong>Country:</strong> ${movie.country || 'N/A'} <br>
-              <strong>Awards:</strong> ${movie.awards || 'N/A'} <br>
-              <strong>IMDB Rating:</strong> ${movie.rating} <br>
+              <strong>Poster:</strong> <img src="${movie.Poster}" alt="${movie.Title} Poster" style="max-width: 200px;" /> <br>
+              <strong>Title:</strong> ${movie.Title} <br>
+              <strong>Year:</strong> ${movie.Year} <br>
+              <strong>Rated:</strong> ${movie.Rated || 'N/A'} <br>
+              <strong>Released:</strong> ${movie.Released || 'N/A'} <br>
+              <strong>Runtime:</strong> ${movie.Runtime} <br>
+              <strong>Genres:</strong> ${movie.Genre || 'N/A'} <br>
+              <strong>Directors:</strong> ${movie.Director || 'N/A'} <br>
+              <strong>Writers:</strong> ${movie.Writer || 'N/A'} <br>
+              <strong>Actors:</strong> ${movie.Actors || 'N/A'} <br>
+              <strong>Plot:</strong> ${movie.Plot} <br>
+              
+              <strong>Language:</strong> ${movie.Language} <br>
+              <strong>Country:</strong> ${movie.Country || 'N/A'} <br>
+              <strong>Awards:</strong> ${movie.Awards || 'N/A'} <br>
+              <strong>IMDB Rating:</strong> ${movie.imdbRating} <br>
               <strong>IMDB Votes:</strong> ${movie.imdbVotes || 'N/A'} <br>
-              <strong>Box Office:</strong> ${movie.boxOffice || 'N/A'} <br>
+              <strong>Metascore:</strong> ${movie.Metascore || 'N/A'} <br>
+              <strong>Box Office:</strong> ${movie.BoxOffice || 'N/A'} <br>
+              <strong>Type:</strong> ${movie.Type || 'N/A'} <br>
+              <strong>Production:</strong> ${movie.Production || 'N/A'} <br>
+              <strong>Website:</strong> ${movie.Website || 'N/A'} <br>
             `;
             
             div.innerHTML = details;

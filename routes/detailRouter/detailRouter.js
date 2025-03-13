@@ -57,24 +57,8 @@ router.get("/movie-details", async (req, res) => {
 
                 // Check if a movie was found
                 if (movieData.Response === "True") {
-                    return {
-                        name: file.name,
-                        title: movieData.Title,
-                        year: movieData.Year,
-                        parsed: true,
-                        imdbId: movieData.imdbID,
-                        overview: movieData.Plot,
-                        runtime: movieData.Runtime,
-                        genres: movieData.Genre
-                            ? movieData.Genre.split(", ")
-                            : [],
-                        rating: movieData.imdbRating,
-                        image: movieData.Poster,
-                        originalLanguage: movieData.Language,
-                        directors: movieData.Director
-                            ? movieData.Director.split(", ")
-                            : [],
-                    };
+                    // Return the entire OMDb response
+                    return movieData;
                 } else {
                     console.log(`No matches found for ${file.title} in OMDb`);
                     return {
