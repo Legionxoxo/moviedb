@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Details</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .movie { margin: 20px 0; border: 1px solid #ccc; padding: 10px; border-radius: 8px; }
+    .error { color: red; }
+    img { max-width: 200px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Movie Details</h1>
+  <div id="folder-contents"></div>
+
+  <script>
+    // Fetch movie details from the backend using the updated '/details/movie-details' endpoint
+    fetch('/details/movie-details')
+      .then(response => response.json())
+      .then(data => {
+        const folderContentsDiv = document.getElementById('folder-contents');
+
+        console.log(data)
+        
+        data.forEach(movie => {
+          const div = document.createElement('div');
+          div.classList.add('movie');
+          
+          // Check if the movie has an error
+          if (movie.error) {
+            div.textContent = `${movie.name} - Error: ${movie.error}`;
+            div.classList.add('error');
+          } else {
+            // Movie image
+            if (movie.image) {
+              const img = document.createElement('img');
+              img.src = movie.image;
+              div.appendChild(img);
+            }
+
+            // Movie details
+            console.log
+            const details = `
+              <strong>Title:</strong> ${movie.title} <br>
+              <strong>Year:</strong> ${movie.year} <br>
+              <strong>Rated:</strong> ${movie.rated || 'N/A'} <br>
+              <strong>Released:</strong> ${movie.released || 'N/A'} <br>
+              <strong>Runtime:</strong> ${movie.runtime} <br>
+              <strong>Genres:</strong> ${movie.genres.join(', ')} <br>
+              <strong>Directors:</strong> ${movie.directors.join(', ')} <br>
+              <strong>Writers:</strong> ${movie.writers ? movie.writers.join(', ') : 'N/A'} <br>
+              <strong>Actors:</strong> ${movie.actors || 'N/A'} <br>
+              <strong>Plot:</strong> ${movie.overview} <br>
+              <strong>Language:</strong> ${movie.originalLanguage} <br>
+              <strong>Country:</strong> ${movie.country || 'N/A'} <br>
+              <strong>Awards:</strong> ${movie.awards || 'N/A'} <br>
+              <strong>IMDB Rating:</strong> ${movie.rating} <br>
+              <strong>IMDB Votes:</strong> ${movie.imdbVotes || 'N/A'} <br>
+              <strong>Box Office:</strong> ${movie.boxOffice || 'N/A'} <br>
+            `;
+            
+            div.innerHTML = details;
+          }
+
+          folderContentsDiv.appendChild(div);
+        });
+      })
+      .catch(err => {
+        console.error('Error fetching movie details:', err);
+      });
+  </script>
+</body>
+</html>
