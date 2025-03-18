@@ -12,7 +12,7 @@ router.get("/movie-details", async (req, res) => {
         const response = await axios.get(
             `${req.protocol}://${req.get("host")}/file/folder-contents`
         );
-        const files = response.data;
+        const files = response.data.movies;
 
         console.log("Folder contents fetched:", files);
 
@@ -53,8 +53,6 @@ router.get("/movie-details", async (req, res) => {
 
                 const movieData = searchResponse.data;
 
-                console.log(`OMDb response for ${file.title}:`, movieData);
-
                 // Check if a movie was found
                 if (movieData.Response === "True") {
                     // Return the entire OMDb response
@@ -86,8 +84,6 @@ router.get("/movie-details", async (req, res) => {
 
         // Wait for all promises to resolve
         const movieDetails = await Promise.all(movieDetailsPromises);
-
-        console.log("Final movie details:", movieDetails);
 
         res.json(movieDetails);
     } catch (error) {

@@ -3,80 +3,634 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Movie Details</title>
+  <title>Details Viewer</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .movie { margin: 20px 0; border: 1px solid #ccc; padding: 10px; border-radius: 8px; }
-    .error { color: red; }
-    img { max-width: 200px; margin-bottom: 10px; }
+    :root {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #2e2e2e;
+      --bg-hover: #3e3e3e;
+      --text-primary: #ffffff;
+      --accent-color: #ffcc00;
+      --error-color: #ff5555;
+      --border-radius: 8px;
+      --transition-speed: 0.3s;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+    
+    h2 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+    
+    button {
+      cursor: pointer;
+      background-color: var(--accent-color);
+      color: var(--bg-primary);
+      border: none;
+      padding: 10px 15px;
+      border-radius: var(--border-radius);
+      font-weight: bold;
+      margin-top: 20px;
+      transition: opacity var(--transition-speed);
+    }
+    
+    button:hover {
+      opacity: 0.9;
+    }
+    
+    .category-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 30px 0;
+      gap: 20px;
+    }
+    
+    .category {
+      cursor: pointer;
+      padding: 30px;
+      background-color: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      transition: transform var(--transition-speed), background-color var(--transition-speed);
+      flex: 1;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .category:hover {
+      background-color: var(--bg-hover);
+      transform: translateY(-5px);
+    }
+    
+    .category h2 {
+      margin: 0;
+      color: var(--accent-color);
+      font-size: 2.2rem;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .grid-item {
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform var(--transition-speed);
+    }
+    
+    .grid-item:hover {
+      transform: translateY(-5px);
+    }
+    
+    .grid-item img {
+      width: 200px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .grid-item .title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: center;
+      color: var(--text-primary);
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      max-height: 3rem;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+    }
+    
+    .modal-content {
+      background-color: var(--bg-secondary);
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: var(--border-radius);
+      max-width: 800px;
+      width: 90%;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .close-button {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .close-button:hover {
+      color: var(--accent-color);
+    }
+    
+    .item-details {
+      display: flex;
+      gap: 25px;
+    }
+    
+    .item-image {
+      flex: 0 0 auto;
+    }
+    
+    .item-image img {
+      width: 220px;
+      height: 330px;
+      object-fit: cover;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .item-info {
+      flex: 1;
+    }
+    
+    .item-title {
+      color: var(--accent-color);
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    
+    .item-info p {
+      margin-bottom: 12px;
+    }
+    
+    .error {
+      color: var(--error-color);
+      padding: 10px;
+      border-left: 3px solid var(--error-color);
+      margin: 10px 0;
+    }
+    
+    .subtitle-select {
+      margin-top: 20px;
+    }
+    
+    select {
+      background-color: #444;
+      color: var(--text-primary);
+      border: none;
+      padding: 10px 15px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      width: 100%;
+      max-width: 250px;
+      font-size: 1rem;
+    }
+    
+    select:focus {
+      outline: 2px solid var(--accent-color);
+    }
+    
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+      transition: opacity var(--transition-speed);
+      font-weight: bold;
+    }
+    
+    a:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+    
+    .subtitles {
+      margin-top: 15px;
+    }
+    
+    .subtitle-link {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 10px;
+      background-color: var(--accent-color);
+      color: var(--bg-primary);
+      border-radius: var(--border-radius);
+    }
+    
+    .subtitle-link:hover {
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    
+    .loading {
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 20px 0;
+    }
+    
+    @media (max-width: 768px) {
+      .category-container {
+        flex-direction: column;
+      }
+      
+      .grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+      }
+      
+      .grid-item img {
+        width: 150px;
+        height: 225px;
+      }
+      
+      .item-details {
+        flex-direction: column;
+      }
+      
+      .item-image img {
+        width: 180px;
+        height: 270px;
+        margin: 0 auto;
+        display: block;
+      }
+      
+      .item-image {
+        margin-bottom: 15px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .category h2 {
+        font-size: 1.8rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Movie Details</h1>
-  <div id="folder-contents"></div>
+  
+  
+  <!-- Main view with category links -->
+  <div id="main-view" class="category-container">
+    <div class="category" onclick="showCategory('movies')">
+      <h2>Movies</h2>
+    </div>
+    <div class="category" onclick="showCategory('anime')">
+      <h2>Anime</h2>
+    </div>
+    <div class="category" onclick="showCategory('audiobooks')">
+      <h2>Audiobooks</h2>
+    </div>
+  </div>
+
+  <!-- Detailed view for each category -->
+  <div id="movies-view" class="hidden">
+    <h2>Movies</h2>
+    <div id="movies-contents" class="grid-container"></div>
+    <button onclick="showMainView()">Back to Categories</button>
+  </div>
+
+  <div id="anime-view" class="hidden">
+    <h2>Anime</h2>
+    <div id="anime-contents" class="grid-container"></div>
+    <button onclick="showMainView()">Back to Categories</button>
+  </div>
+
+  <div id="audiobooks-view" class="hidden">
+    <h2>Audiobooks</h2>
+    <div id="audiobook-contents" class="grid-container"></div>
+    <button onclick="showMainView()">Back to Categories</button>
+  </div>
+
+  <!-- Modal for detailed view -->
+  <div id="details-modal" class="modal">
+    <div class="modal-content">
+      <button class="close-button" onclick="closeModal()">×</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
 
   <script>
-    // Fetch movie details from the backend using the updated '/details/movie-details' endpoint
-    fetch('/details/movie-details')
-      .then(response => response.json())
-      .then(data => {
-        const folderContentsDiv = document.getElementById('folder-contents');
+    // Category mapping for endpoint and display
+    const categoryConfig = {
+      movies: {
+        endpoint: '/details/movie-details',
+        imageKey: 'Poster',
+        titleKey: 'Title',
+        yearKey: 'Year',
+        genreKey: 'Genre',
+        directorKey: 'Director',
+        actorsKey: 'Actors',
+        plotKey: 'Plot',
+        ratingKey: 'imdbRating',
+        scoreKey: 'Metascore',
+        boxOfficeKey: 'BoxOffice'
+      },
+      anime: {
+        endpoint: '/details/anilist-movie-details',
+        imageKey: 'coverImage',
+        titleKey: 'title',
+        yearKey: 'year',
+        genreKey: 'genres',
+        directorKey: 'directors',
+        actorsKey: 'voice_actors',
+        plotKey: 'description',
+        ratingKey: 'rating',
+        scoreKey: 'averageScore'
+      },
+      audiobooks: {
+        endpoint: '/details/book-details',
+        imageKey: 'coverImage',
+        titleKey: 'name',
+        yearKey: 'year',
+        genreKey: 'genres',
+        directorKey: 'author',
+        actorsKey: 'narrators',
+        plotKey: 'description',
+        ratingKey: 'rating',
+        scoreKey: 'score'
+      }
+    };
 
-        console.log(data);
-        
-        data.forEach(movie => {
-          const div = document.createElement('div');
-          div.classList.add('movie');
-          
-          // Check if the movie has an error
-          if (movie.error) {
-            div.textContent = `${movie.name} - Error: ${movie.error}`;
-            div.classList.add('error');
-          } else {
-            // Movie image
-            if (movie.Poster) {
-              const img = document.createElement('img');
-              img.src = movie.Poster;
-              div.appendChild(img);
-            }
+    // Keep track of loaded data to avoid unnecessary fetches
+    const loadedData = {};
+    let currentCategory = '';
 
-           
+    function showCategory(category) {
+      document.getElementById('main-view').classList.add('hidden');
+      document.getElementById(`${category}-view`).classList.remove('hidden');
+      currentCategory = category;
+      
+      if (!loadedData[category]) {
+        showLoadingState(category);
+        fetchCategoryData(category);
+      }
+    }
 
-            // Movie details
-            const details = `
-              <strong>Poster:</strong> <img src="${movie.Poster}" alt="${movie.Title} Poster" style="max-width: 200px;" /> <br>
-              <strong>Title:</strong> ${movie.Title} <br>
-              <strong>Year:</strong> ${movie.Year} <br>
-              <strong>Rated:</strong> ${movie.Rated || 'N/A'} <br>
-              <strong>Released:</strong> ${movie.Released || 'N/A'} <br>
-              <strong>Runtime:</strong> ${movie.Runtime} <br>
-              <strong>Genres:</strong> ${movie.Genre || 'N/A'} <br>
-              <strong>Directors:</strong> ${movie.Director || 'N/A'} <br>
-              <strong>Writers:</strong> ${movie.Writer || 'N/A'} <br>
-              <strong>Actors:</strong> ${movie.Actors || 'N/A'} <br>
-              <strong>Plot:</strong> ${movie.Plot} <br>
-              
-              <strong>Language:</strong> ${movie.Language} <br>
-              <strong>Country:</strong> ${movie.Country || 'N/A'} <br>
-              <strong>Awards:</strong> ${movie.Awards || 'N/A'} <br>
-              <strong>IMDB Rating:</strong> ${movie.imdbRating} <br>
-              <strong>IMDB Votes:</strong> ${movie.imdbVotes || 'N/A'} <br>
-              <strong>Metascore:</strong> ${movie.Metascore || 'N/A'} <br>
-              <strong>Box Office:</strong> ${movie.BoxOffice || 'N/A'} <br>
-              <strong>Type:</strong> ${movie.Type || 'N/A'} <br>
-              <strong>Production:</strong> ${movie.Production || 'N/A'} <br>
-              <strong>Website:</strong> ${movie.Website || 'N/A'} <br>
-            `;
-            
-            div.innerHTML = details;
+    function showLoadingState(category) {
+      const contentElement = document.getElementById(`${category}-contents`);
+      contentElement.innerHTML = '<div class="loading">Loading data...</div>';
+    }
+
+    function showMainView() {
+      document.getElementById('main-view').classList.remove('hidden');
+      document.getElementById('movies-view').classList.add('hidden');
+      document.getElementById('anime-view').classList.add('hidden');
+      document.getElementById('audiobooks-view').classList.add('hidden');
+      currentCategory = '';
+    }
+
+    function fetchCategoryData(category) {
+      const config = categoryConfig[category];
+      
+      fetch(config.endpoint)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
           }
-
-          folderContentsDiv.appendChild(div);
+          return response.json();
+        })
+        .then(data => {
+          loadedData[category] = data;
+          displayGridItems(data, `${category}-contents`, category);
+        })
+        .catch(err => {
+          console.error(`Error fetching ${category} details:`, err);
+          showFetchError(category, err.message);
         });
-      })
-      .catch(err => {
-        console.error('Error fetching movie details:', err);
+    }
+
+    function showFetchError(category, message) {
+      const contentElement = document.getElementById(`${category}-contents`);
+      contentElement.innerHTML = `
+        <div class="error">
+          <p>Failed to load ${category} data: ${message}</p>
+          <button onclick="fetchCategoryData('${category}')">Try Again</button>
+        </div>
+      `;
+    }
+
+    function displayGridItems(data, sectionId, category) {
+      const sectionDiv = document.getElementById(sectionId);
+      const config = categoryConfig[category];
+      
+      if (!data || data.length === 0) {
+        sectionDiv.innerHTML = `<div class="error">No ${category} data available</div>`;
+        return;
+      }
+      
+      sectionDiv.innerHTML = ''; 
+
+      data.forEach((item, index) => {
+        if (item.error) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = "error";
+          errorDiv.innerHTML = `<p>${item.name || 'Item'} - Error: ${item.error}</p>`;
+          sectionDiv.appendChild(errorDiv);
+          return;
+        }
+
+        const imageUrl = item[config.imageKey] || '';
+        const title = item[config.titleKey] || item.name || 'N/A';
+        
+        const gridItem = document.createElement('div');
+        gridItem.className = 'grid-item';
+        gridItem.setAttribute('data-index', index);
+        gridItem.onclick = () => showItemDetails(category, index);
+        
+        gridItem.innerHTML = `
+          <img src="${imageUrl}" alt="${title} cover" onerror="this.src='data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22300%22%20viewBox%3D%220%200%20200%20300%22%3E%3Crect%20fill%3D%22%23555%22%20width%3D%22200%22%20height%3D%22300%22%2F%3E%3Ctext%20fill%3D%22%23fff%22%20font-family%3D%22Arial%22%20font-size%3D%2220%22%20x%3D%22100%22%20y%3D%22150%22%20text-anchor%3D%22middle%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';" />
+          <div class="title">${title}</div>
+        `;
+        
+        sectionDiv.appendChild(gridItem);
       });
+    }
+
+    function showItemDetails(category, index) {
+      const item = loadedData[category][index];
+      const config = categoryConfig[category];
+      const modal = document.getElementById('details-modal');
+      const modalContent = document.getElementById('modal-content');
+      
+      if (!item) {
+        console.error('Item not found:', category, index);
+        return;
+      }
+      
+      const imageUrl = item[config.imageKey] || '';
+      const title = item[config.titleKey] || item.name || 'N/A';
+      const sanitizedTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
+      
+      modalContent.innerHTML = `
+        <div class="item-details">
+          <div class="item-image">
+            <img src="${imageUrl}" alt="${title} cover" onerror="this.src='data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22220%22%20height%3D%22330%22%20viewBox%3D%220%200%20220%20330%22%3E%3Crect%20fill%3D%22%23555%22%20width%3D%22220%22%20height%3D%22330%22%2F%3E%3Ctext%20fill%3D%22%23fff%22%20font-family%3D%22Arial%22%20font-size%3D%2220%22%20x%3D%22110%22%20y%3D%22165%22%20text-anchor%3D%22middle%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';" />
+          </div>
+          <div class="item-info">
+            <h3 class="item-title">${title}</h3>
+            <p><strong>Year:</strong> ${item[config.yearKey] || 'N/A'}</p>
+            <p><strong>Genres:</strong> ${item[config.genreKey] || 'N/A'}</p>
+            <p><strong>Directors:</strong> ${item[config.directorKey] || 'N/A'}</p>
+            <p><strong>Actors:</strong> ${item[config.actorsKey] || 'N/A'}</p>
+            <p><strong>Plot:</strong> ${item[config.plotKey] || 'N/A'}</p>
+            <p><strong>Rating:</strong> ${item[config.ratingKey] || 'N/A'}</p>
+            <p><strong>Score:</strong> ${item[config.scoreKey] || 'N/A'}</p>
+            ${item.BoxOffice ? `<p><strong>Box Office:</strong> ${item.BoxOffice}</p>` : ''}
+            
+            <div class="subtitle-select">
+              <label for="language-select-${sanitizedTitle}">Choose subtitle language:</label>
+              <select id="language-select-${sanitizedTitle}" onchange="fetchSubtitles('${sanitizedTitle}', '${title}', this.value)">
+                <option value="">Select Language</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="zh">Chinese</option>
+              </select>
+              <div id="subtitles-${sanitizedTitle}" class="subtitles"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      modal.style.display = 'block';
+      
+      // Close modal when clicking outside the content
+      modal.onclick = function(event) {
+        if (event.target === modal) {
+          closeModal();
+        }
+      };
+      
+      // Add keyboard support for closing modal
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    function closeModal() {
+      document.getElementById('details-modal').style.display = 'none';
+      document.removeEventListener('keydown', handleEscapeKey);
+    }
+
+    function handleEscapeKey(event) {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    }
+
+    function fetchSubtitles(sanitizedTitle, originalTitle, language) {
+      if (!originalTitle || !language) {
+        console.error('Title and language are required to fetch subtitles.');
+        return;
+      }
+
+      const subtitlesDiv = document.getElementById(`subtitles-${sanitizedTitle}`);
+      subtitlesDiv.innerHTML = '<p>Loading subtitles...</p>';
+
+      fetch(`/subtitles/fetch-subtitles?title=${encodeURIComponent(originalTitle)}&language=${language}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(subtitles => {
+          subtitlesDiv.innerHTML = ''; // Clear loading message
+
+          if (subtitles && subtitles.length > 0) {
+            const subtitleList = document.createElement('div');
+            
+            subtitles.forEach(sub => {
+              const subItem = document.createElement('div');
+              subItem.innerHTML = `
+                <p><strong>Language:</strong> ${sub.attributes.language}</p>
+                <p><a href="${sub.attributes.url}" class="subtitle-link" target="_blank" download>Download Subtitles</a></p>
+              `;
+              subtitleList.appendChild(subItem);
+            });
+            
+            subtitlesDiv.appendChild(subtitleList);
+          } else {
+            subtitlesDiv.innerHTML = `<p class="error">No subtitles found for "${originalTitle}" in ${getLanguageName(language)}</p>`;
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching subtitles:', err);
+          subtitlesDiv.innerHTML = `<p class="error">Failed to load subtitles: ${err.message}</p>`;
+        });
+    }
+
+    function getLanguageName(code) {
+      const languages = {
+        'en': 'English',
+        'es': 'Spanish',
+        'fr': 'French',
+        'de': 'German',
+        'it': 'Italian',
+        'pt': 'Portuguese',
+        'ru': 'Russian',
+        'ja': 'Japanese',
+        'ko': 'Korean',
+        'zh': 'Chinese'
+      };
+      return languages[code] || code;
+    }
+
+    // Add event listeners for keyboard navigation
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && document.getElementById('details-modal').style.display === 'block') {
+        closeModal();
+      }
+    });
   </script>
 </body>
 </html>
