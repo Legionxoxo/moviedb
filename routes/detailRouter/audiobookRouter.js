@@ -84,7 +84,7 @@ router.get("/book-details", async (req, res) => {
 
         // Wait for all promises to resolve
         const bookDetails = await Promise.all(bookDetailsPromises);
-
+        console.log(bookDetails);
         res.json(bookDetails);
     } catch (error) {
         console.error("Error fetching book details:", error.message);

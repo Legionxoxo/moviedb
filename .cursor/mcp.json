@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "Figma MCP": {
+      "url": "http://localhost:3333/sse"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+-# Prologue
+- Unless specified, these rules for coding must be strictly followed
+- Try to mimic writing style of existing code in the codebase or whatever you have access to as much as possible while following the guidelines
+- Write the most elegant and readable code
+
+
+# Coding guidelines
+- Functional programming method of coding is to be followed
+- Follow the DRY principle, best attempt to reuse existing code via backwards compatible changes or create separate files for repeatable components
+- The utils folder will contain all the utility functions, i.e. the occasionally used generic mini functions like randomness generators, input checkers, try catch wrappers and so on. Treat it like your tool belt.
+- Make sure each file you are working on doesn't exceed 180 - 240 lines of code. Modularize otherwise.
+- Maintain proper comments before each section/segment of the code and for each function and param (JSDoc) to make things readable
+- Respect prettier rules for the project
+- Separate each segment of the code/function by double new line characters to make it readable
+- Not endless recursions. Make sure every recursion or infinite loop has a reasonable upper limit based on the context
+- Implement try catch finally wherever possible. The code cannot crash. The return statement (if any) must be inside the finally block
