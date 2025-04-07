@@ -1,57 +1,44 @@
 const express = require("express");
-const router = express.Router();
 const axios = require("axios");
 require("dotenv").config();
 
-// Function to fetch subtitles using OpenSubtitles API
-const fetchSubtitles = async (title, language) => {
-    try {
-        const response = await axios({
-            method: "get",
-            url: `https://api.opensubtitles.com/api/v1/subtitles`,
-            headers: {
-                "Api-Key": process.env.OPENSUBTITLES_API_KEY,
-            },
-            params: {
-                query: title,
-                languages: language,
-            },
-        });
+const router = express.Router();
 
-        return response.data.data || [];
-    } catch (error) {
-        console.error(`Error fetching subtitles for ${title}:`, error.message);
-        return null;
-    }
-};
+// Use environment variable for API URL, default to localhost if not set
+const BASE_URL = process.env.SUBTITLES_API_URL || "http://localhost:4000";
 
-// Route to fetch subtitles
+/**
+ * Proxy route to fetch subtitles from another server
+ */
 router.get("/fetch-subtitles", async (req, res) => {
     const { title, language } = req.query;
 
     if (!title || !language) {
-        return res.status(400).json({
-            message: "Title and language are required to fetch subtitles.",
-        });
+        return res
+            .status(400)
+            .json({ success: false, msg: "Title and language are required." });
     }
 
     try {
-        console.log(`Fetching subtitles for: ${title} in ${language} language`);
+        console.log(
+            `Proxy: Fetching subtitles for ${title} in ${language} language`
+        );
 
-        // Fetch subtitles using OpenSubtitles API
-        const subtitles = await fetchSubtitles(title, language);
+        // Call the original subtitles API internally
+        const response = await axios.post(`${BASE_URL}/fetch-subtitles`, {
+            title,
+            language,
+        });
 
-        if (subtitles && subtitles.length > 0) {
-            res.json(subtitles);
-        } else {
-            res.status(404).json({
-                message: `No subtitles found for ${title} in ${language}`,
-            });
-        }
+        res.json(response.data);
     } catch (error) {
-        console.error(`Error fetching subtitles for ${title}:`, error.message);
+        console.error(
+            `Error fetching subtitles via proxy for ${title}:`,
+            error.message
+        );
         res.status(500).json({
-            message: "Failed to fetch subtitles",
+            success: false,
+            msg: "Failed to fetch subtitles",
             error: error.message,
         });
     }

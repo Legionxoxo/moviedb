@@ -1,11 +1,9 @@
-// functions/extractDetails.js
 const path = require("path");
 
 function extractDetails(fileName) {
     // Get the base name without the extension, case-insensitive
     const baseName = path.basename(fileName, path.extname(fileName));
 
-    // Debug the exact string we're working with
     console.log(`Processing: "${baseName}"`);
 
     // More flexible regex that allows for different title formats
@@ -16,12 +14,11 @@ function extractDetails(fileName) {
     const match = baseName.match(/^(.+?)[\s]*\((\d{4})\)$/i);
 
     if (match) {
-        const title = match[1].trim(); // Trim any extra spaces from title
-        const year = match[2]; // Extract year
+        const title = match[1].trim();
+        const year = match[2];
         return { title, year };
     }
 
-    // If we get here, the regex didn't match
     console.error(`Failed to parse: "${fileName}"`);
 
     // Instead of throwing an error, we could return partial information

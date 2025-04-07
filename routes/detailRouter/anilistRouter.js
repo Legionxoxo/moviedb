@@ -2,119 +2,72 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 require("dotenv").config();
+const storeAnimeData = require("../../functions/database/storeAnimeData");
 
-// Define the AniList movie details route
+// Define the AniList anime details route
 router.get("/anilist-movie-details", async (req, res) => {
-    try {
-        console.log("Fetching folder contents...");
+    let responsePayload = {
+        success: false,
+        msg: "Something went wrong",
+        data: null,
+    };
 
-        // Call your existing folder-contents endpoint
+    try {
+        console.log("🎞️ Fetching folder contents...");
+
+        // Call local API to get anime folder contents
         const response = await axios.get(
             `${req.protocol}://${req.get("host")}/file/folder-contents`
         );
         const files = response.data.anime;
+        console.log("✅ Folder contents fetched:", files);
 
-        console.log("Folder contents fetched:", files);
-
-        // Function to search for movies using AniList API
-        const searchAniListMovie = async (title) => {
-            const query = `
-            query ($search: String) {
-                Media(search: $search, type: ANIME) {
-                    id
-                    title {
-                        romaji
-                        english
-                        native
-                    }
-                    type
-                    format
-                    status
-                    description
-                    startDate {
-                        year
-                    }
-                    genres
-                    averageScore
-                    coverImage {
-                        large
-                    }
-                }
-            }`;
-
-            const variables = {
-                search: title,
+        if (!files || files.length === 0) {
+            responsePayload = {
+                success: false,
+                msg: "No anime found",
+                data: null,
             };
+            return res.json(responsePayload);
+        }
 
-            const config = {
-                method: "post",
-                url: "https://graphql.anilist.co",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                data: JSON.stringify({
-                    query: query,
-                    variables: variables,
-                }),
-            };
+        // Processing API (external or local)
+        const processingApiUrl =
+            process.env.PROCESSING_API_URL ||
+            "http://localhost:4000/details/anime-details";
 
-            try {
-                const anilistResponse = await axios(config);
-                return anilistResponse.data.data.Media;
-            } catch (error) {
-                console.error(
-                    `Error fetching details from AniList for ${title}:`,
-                    error.message
-                );
-                return null;
+        console.log(`🚀 Sending anime details to ${processingApiUrl}...`);
+        const processingResponse = await axios.post(processingApiUrl, {
+            animes: files,
+        });
+
+        const processedAnimes = processingResponse.data?.data || [];
+
+        // Store each anime entry into the DB
+        for (const anime of processedAnimes) {
+            const result = await storeAnimeData(anime);
+            if (!result.success) {
+                console.warn(`⚠️ Failed to store anime: ${anime.title}`);
             }
+        }
+
+        responsePayload = {
+            success: true,
+            msg: "Anime processed and stored successfully",
+            data: processedAnimes,
         };
-
-        // Process each file to get details from AniList
-        const movieDetailsPromises = files.map(async (file) => {
-            if (file.error) {
-                console.log(
-                    `Error in file: ${file.name}, error: ${file.error}`
-                );
-                return {
-                    name: file.name,
-                    error: file.error,
-                    parsed: false,
-                };
-            }
-
-            const movieData = await searchAniListMovie(file.title);
-
-            if (movieData) {
-                return {
-                    title: movieData.title.english || movieData.title.romaji,
-                    year: movieData.startDate.year,
-                    genres: movieData.genres,
-                    description: movieData.description,
-                    score: movieData.averageScore,
-                    coverImage: movieData.coverImage.large,
-                };
-            } else {
-                console.log(`No matches found for ${file.title} in AniList`);
-                return {
-                    name: file.name,
-                    title: file.title,
-                    parsed: true,
-                    error: "No matches found in AniList",
-                };
-            }
-        });
-
-        // Wait for all promises to resolve
-        const movieDetails = await Promise.all(movieDetailsPromises);
-
-        res.json(movieDetails);
     } catch (error) {
-        console.error("Error fetching movie details:", error.message);
-        res.status(500).json({
-            error: "Failed to fetch movie details",
-            details: error.message,
-        });
+        console.error("❌ Error processing anime details:", error.message);
+        responsePayload = {
+            success: false,
+            msg: `Failed to process anime: ${error.message}`,
+            data: null,
+        };
+    } finally {
+        console.log(
+            "✅ Request processing completed for /anilist-movie-details"
+        );
+        res.json(responsePayload);
     }
 });
 
